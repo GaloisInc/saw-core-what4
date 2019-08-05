@@ -32,7 +32,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE MultiWayIf #-}
 
 -- To allow implicitly provided nats
 {-# LANGUAGE AllowAmbiguousTypes #-}
@@ -54,9 +53,6 @@ module Verifier.SAW.Simulator.What4.SWord where
 -- Overall, the operations below are a bit random about whether they
 -- require an implicit or explicit type argument.
 
-import           Unsafe.Coerce (unsafeCoerce)
-
-import           Data.Proxy (Proxy(..))
 import           Data.Vector (Vector)
 import qualified Data.Vector as V
 import           Numeric.Natural
@@ -364,17 +360,17 @@ bvCountLeadingZeros = bvUn W.bvCountLeadingZeros
 bvCountTrailingZeros :: SWordUn
 bvCountTrailingZeros = bvUn W.bvCountTrailingZeros
 
-bvForall :: forall sym. W.IsSymExprBuilder sym =>
+bvForall :: W.IsSymExprBuilder sym =>
   sym -> Natural -> (SWord sym -> IO (Pred sym)) -> IO (Pred sym)
-bvForall sym w f =
+bvForall sym n f =
   case W.userSymbol "i" of
     Left err -> fail $ show err
     Right indexSymbol ->
-      case someNatVal w of
-        SomeNat (Proxy :: Proxy w) -> if
-          | 1 <= w
-          , Refl :: (1 <=? w) :~: 'True <- unsafeCoerce Refl -> do
-              i <- W.freshBoundVar sym indexSymbol . W.BaseBVRepr $ knownNat @w
+      case mkNatRepr n of
+        Some w
+          | Just LeqProof <- testLeq (knownNat @1) w ->
+            withKnownNat w $ do
+              i <- W.freshBoundVar sym indexSymbol $ W.BaseBVRepr w
               body <- f . DBV $ W.varExpr sym i
               W.forallPred sym i body
           | otherwise -> f ZBV
