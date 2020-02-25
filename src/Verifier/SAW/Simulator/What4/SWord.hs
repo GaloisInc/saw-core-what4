@@ -570,7 +570,7 @@ bvShl sym p (DBV (bv1 :: SymBV sym w1)) (DBV (bv2 :: SymBV sym w2))
   | Just Refl <- testEquality (knownNat @w1) (knownNat @w2)
   = DBV <$> bvShiftL sym p bv1 bv2
   -- amount to shift by is smaller
-  | Just LeqProof <- testLeq (addNat (knownNat @w2) (knownNat @1)) (knownNat @w1)
+  | Just LeqProof <- testLeq (knownNat @w2) (knownNat @w1)
   = do bv2' <- W.bvZext sym (knownNat @w1) bv2
        DBV <$> bvShiftL sym p bv1 bv2'
   | otherwise
@@ -588,7 +588,7 @@ bvShr    :: forall sym. IsExprBuilder sym => sym ->
 bvShr  sym p (DBV (bv1 :: SymBV sym w1)) (DBV (bv2 :: SymBV sym w2))
   | Just Refl <- testEquality (knownNat @w1) (knownNat @w2)
   = DBV <$> bvShiftR sym (W.bvLshr sym) p bv1 bv2
-  | Just LeqProof <- testLeq (addNat (knownNat @w2) (knownNat @1)) (knownNat @w1)
+  | Just LeqProof <- testLeq (knownNat @w2) (knownNat @w1)
   = do bv2' <- W.bvZext sym (knownNat @w1) bv2
        DBV <$> bvShiftR sym (W.bvLshr sym) p bv1 bv2'
   | otherwise
@@ -606,7 +606,7 @@ bvSShr    :: forall sym. IsExprBuilder sym => sym ->
 bvSShr  sym p (DBV (bv1 :: SymBV sym w1)) (DBV (bv2 :: SymBV sym w2))
   | Just Refl <- testEquality (knownNat @w1) (knownNat @w2)
   = DBV <$> bvShiftR sym (W.bvAshr sym) p bv1 bv2
-  | Just LeqProof <- testLeq (addNat (knownNat @w2) (knownNat @1)) (knownNat @w1)
+  | Just LeqProof <- testLeq (knownNat @w2) (knownNat @w1)
   = do bv2' <- W.bvSext sym (knownNat @w1) bv2
        DBV <$> bvShiftR sym (W.bvAshr sym) p bv1 bv2'
   | otherwise
