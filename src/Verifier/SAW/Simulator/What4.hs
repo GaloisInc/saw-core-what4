@@ -48,7 +48,6 @@ module Verifier.SAW.Simulator.What4
   , w4Eval
   , w4EvalAny
   , w4EvalBasic
-  , newVarsForType
   ) where
 
 
