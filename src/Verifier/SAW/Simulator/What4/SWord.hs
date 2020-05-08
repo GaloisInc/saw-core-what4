@@ -32,6 +32,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- To allow implicitly provided nats
 {-# LANGUAGE AllowAmbiguousTypes #-}
@@ -81,7 +82,7 @@ data SWord sym where
   -- a zero-length bit vector. i.e. 0
 
 
-instance Show (SWord sym) where
+instance W.PrintExpr (SymExpr sym) => Show (SWord sym) where
   show (DBV bv) = show $ W.printSymExpr bv
   show ZBV      = "0:[0]"
 
@@ -230,7 +231,7 @@ bvIte _ _ _ _
 ----------------------------------------------------------------------
 
 -- | for debugging
-showVec :: forall sym. (W.IsExpr (W.SymExpr sym)) => Vector (Pred sym) -> String
+showVec :: forall sym. (W.PrintExpr (W.SymExpr sym)) => Vector (Pred sym) -> String
 showVec vec =
   show (PP.list (V.toList (V.map W.printSymExpr vec)))
 
