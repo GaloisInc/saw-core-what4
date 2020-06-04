@@ -101,6 +101,7 @@ import qualified Lang.Crucible.Backend.SAWCore as CS
 import Verifier.SAW.Simulator.What4.SWord
 import Verifier.SAW.Simulator.What4.PosNat
 import Verifier.SAW.Simulator.What4.FirstOrder
+import Verifier.SAW.Simulator.What4.Panic
 
 ---------------------------------------------------------------------
 -- empty datatype to index (open) type families
@@ -519,7 +520,8 @@ arrayConstant sym ity elm
   | Just (Some idx_repr) <- valueAsBaseType ity
   , Just (Some elm_expr) <- valueToSymExpr elm =
     SArray <$> W.constantArray sym (Ctx.Empty Ctx.:> idx_repr) elm_expr
-  | otherwise = fail $ "error"
+  | otherwise =
+    panic "Verifier.SAW.Simulator.What4.Panic.arrayConstant" ["argument type mismatch"]
 
 arrayLookup ::
   W.IsSymExprBuilder sym =>
@@ -533,8 +535,12 @@ arrayLookup sym arr idx
   , W.BaseArrayRepr (Ctx.Empty Ctx.:> idx_repr) elm_repr <- W.exprType arr_expr
   , Just Refl <- testEquality idx_repr (W.exprType idx_expr) = do
     elm_expr <- W.arrayLookup sym arr_expr (Ctx.Empty Ctx.:> idx_expr)
-    maybe (fail $ "error") return $ symExprToValue elm_repr elm_expr
-  | otherwise = fail $ "error"
+    maybe
+      (panic "Verifier.SAW.Simulator.What4.Panic.arrayLookup" ["argument type mismatch"])
+      return
+      (symExprToValue elm_repr elm_expr)
+  | otherwise =
+    panic "Verifier.SAW.Simulator.What4.Panic.arrayLookup" ["argument type mismatch"]
 
 arrayUpdate ::
   W.IsSymExprBuilder sym =>
@@ -551,7 +557,8 @@ arrayUpdate sym arr idx elm
   , Just Refl <- testEquality idx_repr (W.exprType idx_expr)
   , Just Refl <- testEquality elm_repr (W.exprType elm_expr) =
     SArray <$> W.arrayUpdate sym arr_expr (Ctx.Empty Ctx.:> idx_expr) elm_expr
-  | otherwise = fail $ "error"
+  | otherwise =
+    panic "Verifier.SAW.Simulator.What4.Panic.arrayUpdate" ["argument type mismatch"]
 
 ----------------------------------------------------------------------
 -- | A basic symbolic simulator/evaluator: interprets a saw-core Term as
