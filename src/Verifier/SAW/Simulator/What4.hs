@@ -33,6 +33,7 @@
 
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- WithKnownNat
 {-# OPTIONS_GHC -Wno-warnings-deprecations #-}
@@ -504,7 +505,7 @@ selectV merger maxValue valueFn vx =
       p <- bvAt (given :: sym) vx j
       merger p (impl j (y `setBit` j)) (impl j y) where j = i - 1
 
-instance Show (SArray sym) where
+instance W.PrintExpr (SymExpr sym) => Show (SArray sym) where
   show (SArray arr) = show $ W.printSymExpr arr
 
 arrayConstant ::
